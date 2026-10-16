@@ -1,0 +1,9 @@
+# GitHub Linguist Language Stats Configuration
+# Exclude helper/launcher scripts from GitHub's language percentage bar so it shows 100% Python
+
+*.bat linguist-detectable=false
+*.bat linguist-vendored
+*.ps1 linguist-detectable=false
+*.ps1 linguist-vendored
+run_web.bat linguist-detectable=false
+run_web.ps1 linguist-detectable=false
