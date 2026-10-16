@@ -5,11 +5,17 @@ import numpy as np
 from models import CNNIDS, LSTMIDS, TransformerIDS
 from utils import preprocess_data
 
+import os
+
 device = torch.device('cpu')
+base_dir = os.path.dirname(os.path.abspath(__file__))
 
 print("=== 1. Checking Models and Checkpoints ===")
 for m in ['CNN', 'LSTM', 'Transformer']:
-    ckpt = torch.load(f"saved_model_{m}.pt", map_location=device, weights_only=False)
+    ckpt_path = os.path.join(base_dir, "saved_models", f"saved_model_{m}.pt")
+    if not os.path.exists(ckpt_path):
+        ckpt_path = os.path.join(base_dir, f"saved_model_{m}.pt")
+    ckpt = torch.load(ckpt_path, map_location=device, weights_only=False)
     input_dim = ckpt["input_dim"]
     num_classes = ckpt["num_classes"]
     print(f"[{m}] input_dim: {input_dim}, num_classes: {num_classes}")
@@ -25,11 +31,17 @@ for m in ['CNN', 'LSTM', 'Transformer']:
     model.eval()
     print(f"[{m}] Weights successfully loaded into architecture!")
     
-    le = joblib.load(f"label_encoder_{m}.pkl")
+    le_path = os.path.join(base_dir, "saved_models", f"label_encoder_{m}.pkl")
+    if not os.path.exists(le_path):
+        le_path = os.path.join(base_dir, f"label_encoder_{m}.pkl")
+    le = joblib.load(le_path)
     print(f"[{m}] Label encoder classes ({len(le.classes_)}): {list(le.classes_)}")
 
 print("\n=== 2. Testing Sample Prediction on Testing_csv.csv ===")
-df = pd.read_csv("Testing_csv.csv")
+csv_path = os.path.join(base_dir, "data", "Testing_csv.csv")
+if not os.path.exists(csv_path):
+    csv_path = os.path.join(base_dir, "Testing_csv.csv")
+df = pd.read_csv(csv_path)
 print("Testing CSV shape:", df.shape)
 print("Columns in Testing CSV:", list(df.columns[:5]), "...")
 

@@ -17,6 +17,16 @@ columns = [  # 41 features + label
     'dst_host_rerror_rate', 'dst_host_srv_rerror_rate', 'label'
 ]
 
-df = pd.read_csv("KDDTrain_plus.txt", header=None, names=columns)
-df.to_csv("nsl_kdd_cleaned.csv", index=False)
+import os
+
+base_dir = os.path.dirname(os.path.abspath(__file__))
+in_path = os.path.join(base_dir, "data", "KDDTrain_plus.txt")
+if not os.path.exists(in_path):
+    in_path = os.path.join(base_dir, "KDDTrain_plus.txt")
+
+out_path = os.path.join(base_dir, "data", "nsl_kdd_cleaned.csv") if os.path.exists(os.path.join(base_dir, "data")) else os.path.join(base_dir, "nsl_kdd_cleaned.csv")
+
+df = pd.read_csv(in_path, header=None, names=columns)
+df.to_csv(out_path, index=False)
+print(f"✅ Cleaned dataset saved to {out_path}")
 

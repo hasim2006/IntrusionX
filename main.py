@@ -70,15 +70,25 @@ def main():
     parser.add_argument("--epochs", type=int, default=10)
     args = parser.parse_args()
 
+    # Ensure output directories exist
+    os.makedirs("saved_models", exist_ok=True)
+    os.makedirs("reports", exist_ok=True)
+
+    # Resolve dataset path
+    data_path = args.data
+    if not os.path.exists(data_path) and os.path.exists(os.path.join("data", data_path)):
+        data_path = os.path.join("data", data_path)
+
     # Encoding and preprocessing the data
-    df = preprocess_data(args.data)
+    df = preprocess_data(data_path)
 
     label_encoder = LabelEncoder()
     df['label'] = label_encoder.fit_transform(df['label'])
 
     # Save label encoder for UI
-    joblib.dump(label_encoder, f"label_encoder_{args.model}.pkl")
-    print(f"✅ LabelEncoder saved as label_encoder_{args.model}.pkl")
+    le_save_path = os.path.join("saved_models", f"label_encoder_{args.model}.pkl")
+    joblib.dump(label_encoder, le_save_path)
+    print(f"✅ LabelEncoder saved as {le_save_path}")
 
     # Training and Validation split
     train_df, val_df = train_test_split(df, test_size=0.2, stratify=df['label'])
@@ -106,18 +116,20 @@ def main():
     model = train_model(model, train_loader, val_loader, criterion, optimizer, device, args.epochs)
 
     # Evaluating the model
-    evaluate_model(model, val_loader, device, args.model)
+    eval_save_path = os.path.join("reports", "evaluation_results.txt")
+    evaluate_model(model, val_loader, device, args.model, save_path=eval_save_path)
 
     # XAI for the model
-    explain_model(model, df.drop("label", axis=1).values[:100])
+    explain_model(model, df.drop("label", axis=1).values[:100], save_dir="reports")
 
     # Saving the model for UI use
+    model_save_path = os.path.join("saved_models", f"saved_model_{args.model}.pt")
     torch.save({
         'model_state_dict': model.state_dict(),
         'num_classes': num_classes,
         'input_dim': input_dim
-    }, f"saved_model_{args.model}.pt")
-    print(f"✅ Model saved as saved_model_{args.model}.pt with metadata")
+    }, model_save_path)
+    print(f"✅ Model saved as {model_save_path} with metadata")
 
     # Random SHA to print
     test_packet = "SRC:192.168.0.1 DST:192.168.0.2 DATA:Test"

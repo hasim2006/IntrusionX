@@ -52,8 +52,10 @@ env*/
 # Streamlit local settings & cache
 .streamlit/secrets.toml
 
-# Reports, temporary files & outputs
-reports/
+# Temporary generated reports & logs (keeps evaluation_results.txt)
+reports/*.html
+reports/*.png
+!reports/evaluation_results.txt
 *.log
 tmp/
 temp/

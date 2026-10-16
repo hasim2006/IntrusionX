@@ -180,6 +180,22 @@ The system incorporates three distinct deep learning architectures implemented i
 ```text
 IntrusionX/
 │
+├── data/                                         # Datasets & evaluation samples
+│   ├── KDDTrain_plus.txt                         # Raw NSL-KDD Training Dataset (~125,973 records)
+│   ├── nsl_kdd_cleaned.csv                       # Cleaned, preprocessed training dataset
+│   └── Testing_csv.csv                           # Sample batch dataset for quick UI/pipeline tests
+│
+├── saved_models/                                 # Serialized PyTorch weights & label encoders
+│   ├── saved_model_CNN.pt                        # Pre-trained CNN model checkpoint
+│   ├── saved_model_LSTM.pt                       # Pre-trained LSTM model checkpoint
+│   ├── saved_model_Transformer.pt                # Pre-trained Transformer model checkpoint
+│   ├── label_encoder_CNN.pkl                     # Serialized scikit-learn LabelEncoder for CNN
+│   ├── label_encoder_LSTM.pkl                    # Serialized scikit-learn LabelEncoder for LSTM
+│   └── label_encoder_Transformer.pkl             # Serialized scikit-learn LabelEncoder for Transformer
+│
+├── reports/                                      # Benchmark reports and evaluation logs
+│   └── evaluation_results.txt                    # Classification reports, precision/recall & confusion matrices
+│
 ├── ui_with_wireshark.py                          # Full-featured Streamlit UI (4 tabs, live sniffing, PCAP)
 ├── main.py                                       # Training, evaluation & XAI pipeline CLI
 ├── models.py                                     # PyTorch architectures (CNNIDS, LSTMIDS, TransformerIDS)
@@ -187,24 +203,12 @@ IntrusionX/
 ├── preprocessing.py                              # Raw NSL-KDD txt parser & column assigner
 ├── explain.py                                    # Explainable AI module (LIME Tabular & SHAP DeepExplainer)
 ├── test_pipeline.py                              # Automated sanity verification script
+│
 ├── requirements.txt                              # Python package dependencies
-├── .gitignore                                    # Production Git ignore patterns
-│
-├── saved_model_CNN.pt                            # Pre-trained CNN weights and input dimensions
-├── saved_model_LSTM.pt                           # Pre-trained LSTM weights and input dimensions
-├── saved_model_Transformer.pt                    # Pre-trained Transformer weights and input dimensions
-│
-├── label_encoder_CNN.pkl                         # Serialized scikit-learn LabelEncoder for CNN
-├── label_encoder_LSTM.pkl                        # Serialized scikit-learn LabelEncoder for LSTM
-├── label_encoder_Transformer.pkl                 # Serialized scikit-learn LabelEncoder for Transformer
-│
-├── KDDTrain_plus.txt                             # Raw NSL-KDD Training Dataset (~125,973 records)
-├── nsl_kdd_cleaned.csv                           # Cleaned, comma-separated training dataset
-├── Testing_csv.csv                               # Pre-packaged test batch sample for quick evaluation
-├── evaluation_results.txt                        # Raw classification reports & confusion matrices
-│
 ├── run_web.bat                                   # One-click Windows CMD launcher for Streamlit App
 ├── run_web.ps1                                   # One-click Windows PowerShell launcher
+├── .gitignore                                    # Production Git ignore rules
+├── .gitattributes                                # GitHub Linguist stats configuration
 └── README.md                                     # Full technical documentation
 ```
 
@@ -317,28 +321,28 @@ You can retrain any model architecture from scratch using `main.py`:
 
 ```bash
 # Train Transformer IDS for 15 epochs
-python main.py --data nsl_kdd_cleaned.csv --model Transformer --epochs 15
+python main.py --data data/nsl_kdd_cleaned.csv --model Transformer --epochs 15
 
 # Train 1D-CNN IDS for 20 epochs
-python main.py --data nsl_kdd_cleaned.csv --model CNN --epochs 20
+python main.py --data data/nsl_kdd_cleaned.csv --model CNN --epochs 20
 
 # Train LSTM IDS for 10 epochs
-python main.py --data nsl_kdd_cleaned.csv --model LSTM --epochs 10
+python main.py --data data/nsl_kdd_cleaned.csv --model LSTM --epochs 10
 ```
 
 When training completes, `main.py` will:
 1. Automatically evaluate on an 80/20 stratified validation split.
-2. Append precision, recall, F1, and confusion matrix to `evaluation_results.txt`.
+2. Append precision, recall, F1, and confusion matrix to `reports/evaluation_results.txt`.
 3. Generate **LIME** local feature explanations in `reports/lime_explanation.html`.
 4. Generate **SHAP** summary plots in `reports/shap_summary.png`.
-5. Serialize the model weights (`saved_model_<MODEL>.pt`) and label encoder (`label_encoder_<MODEL>.pkl`).
+5. Serialize the model weights (`saved_models/saved_model_<MODEL>.pt`) and label encoder (`saved_models/label_encoder_<MODEL>.pkl`).
 
 ### 2. Validating Pre-trained Artifacts
 To verify that all checkpoints, dimensions, and encoders are operational:
 ```bash
 python test_pipeline.py
 ```
-This tests checkpoint loading for all three models and runs inference on `Testing_csv.csv`.
+This tests checkpoint loading for all three models and runs inference on `data/Testing_csv.csv`.
 
 ---
 

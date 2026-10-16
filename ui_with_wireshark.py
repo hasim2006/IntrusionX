@@ -21,9 +21,16 @@ from collections import defaultdict
 def load_model(model_type, model_path, device):
     if not os.path.isabs(model_path):
         base_dir = os.path.dirname(os.path.abspath(__file__))
-        alt_path = os.path.join(base_dir, model_path)
-        if os.path.exists(alt_path):
-            model_path = alt_path
+        candidates = [
+            os.path.join(base_dir, "saved_models", model_path),
+            os.path.join(base_dir, model_path),
+            os.path.join("saved_models", model_path),
+            model_path
+        ]
+        for c in candidates:
+            if os.path.exists(c):
+                model_path = c
+                break
     checkpoint = torch.load(model_path, map_location=device, weights_only=False)
     
     # Read the saved model parameters
